@@ -1,0 +1,16 @@
+{
+  "name": "caso-de-estudio-registro-de-notas-de-una-academia-de-idiomas",
+  "version": "1.0.0",
+  "description": "Caso-de-Estudio-Registro-de-Notas-de-una-Academia-de-Idiomas",
+  "main": "Registro-de-notas.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Diegi Gómez",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "readline": "^1.3.0",
+    "readline-sync": "^1.4.10"
+  }
+}
