@@ -11,35 +11,38 @@ let promedios = []
 let aprobados = []
 let reprobados = []
 
-
-function ingresarNombre() {
+function preguntar(pregunta) {
     return new Promise((resolve) => {
-        rl.question('Nombre: ', (nombre) => {
-            resolve(nombre)
+        rl.question(pregunta, (respuesta) => {
+            resolve(respuesta)
         })
     })
 }
 
-function ingresarNotas() {
-    return new Promise((resolve) => {
-        let notas = []
-        let contador = 1
+async function ingresarNombre() {
+    const nombre = await preguntar('Nombre: ')
+    return nombre.trim()
+}
 
-        const pedirNota = () => {
-            rl.question(`Nota ${contador}: `, (nota) => {
-                notas.push(parseFloat(nota))
-                contador++
+async function ingresarNotas() {
+    let notas = []
 
-                if (contador <= 4) {
-                    pedirNota()
-                } else {
-                    resolve(notas)
-                }
-            })
+    for (let i = 1; i <= 4; i++) {
+        let notaValida = false
+        let nota
+        while (!notaValida) {
+            const entrada = await preguntar(`Nota ${i}: `)
+            nota = parseFloat(entrada)
+            if (!isNaN(nota) && nota >= 0 && nota <= 10) {
+                notaValida = true
+            } else {
+                console.log(chalk.red('⚠️  Ingrese una nota válida entre 0 y 10.'))
+            }
         }
+        notas.push(nota)
+    }
 
-        pedirNota()
-    });
+    return notas
 }
 
 function calcularPromedio(notas) {
@@ -48,18 +51,20 @@ function calcularPromedio(notas) {
 }
 
 async function registrarEstudiantes() {
-    const cantidad = parseInt(await new Promise((resolve) => {
-        rl.question('¿Cuántos estudiantes desea registrar? ', (cantidad) => {
-            resolve(cantidad)
-        })
-    }))
+    const entradaCantidad = await preguntar('¿Cuántos estudiantes desea registrar? ')
+    const cantidad = parseInt(entradaCantidad)
 
-   
+    if (isNaN(cantidad) || cantidad <= 0) {
+        console.log(chalk.red('❌ Cantidad inválida. Debe ser un número mayor que 0.'))
+        rl.close()
+        return
+    }
+
     for (let i = 0; i < cantidad; i++) {
-        console.log (chalk.blue(`Estudiante ${i + 1}:`))
-        const nombre = await ingresarNombre();
-        const notas = await ingresarNotas();
-        const promedio = calcularPromedio(notas);
+        console.log(`\nEstudiante ${i + 1}:`)
+        const nombre = await ingresarNombre()
+        const notas = await ingresarNotas()
+        const promedio = calcularPromedio(notas)
 
         nombres.push(nombre)
         promedios.push(promedio)
@@ -71,19 +76,17 @@ async function registrarEstudiantes() {
         }
     }
 
-    console.log("+=====================================================================================================+")
-
-
-    console.log('\nReporte de Calificaciones:')
+    console.log("\n+=====================================================================================================+")
+    console.log('\n📋 Reporte de Calificaciones:')
     for (let i = 0; i < cantidad; i++) {
         const estado = promedios[i] >= 7 ? '✅ Aprobado' : '❌ Reprobado'
-        const color = promedios[i] >= 7 ? chalk.green : chalk.red; 
-        console.log(`${nombres[i]}: [${color(promedios[i].toFixed(2))}] - Promedio: ${color(promedios[i].toFixed(2))} ${estado}`)
+        const color = promedios[i] >= 7 ? chalk.green : chalk.red
+        console.log(`${nombres[i]}: Promedio: ${(promedios[i].toFixed(2))} ${estado}`)
     }
 
-    console.log(chalk.yellow('\nResumen general:'))
-    console.log(`${aprobados.length} estudiante(s) aprobado(s): ${chalk.green(aprobados.join(', '))}`)
-    console.log(`${reprobados.length} estudiante(s) reprobado(s): ${chalk.red(reprobados.join(', '))}`)
+    console.log('\n📊 Resumen general:')
+    console.log(`${aprobados.length} estudiante(s) aprobado(s): ${(aprobados.join(', ') || 'Ninguno')}`)
+    console.log(`${reprobados.length} estudiante(s) reprobado(s): ${(reprobados.join(', ') || 'Ninguno')}`)
 
     rl.close()
 }
